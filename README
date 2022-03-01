@@ -1,0 +1,43 @@
+uSmalltalk Homework Comp 105 Spring 2021
+
+Step 1.29, multiplication improvement:
+
+    We have two versions of multiplication, the first cannot multiply
+    99^99 without an arithmetic overflow. The other is the suggested 
+    improvement given in Piazza @694 and @699, which allows 99^99 AND
+    (so far tested) at least 150^150
+
+    The first implementation is...
+   
+    ! NatZero
+      (method * (aNatural) self)
+
+    ! NatNonZero 
+      (method * (aNatural) [locals zhi zlo]
+       (set zhi ((Natural fromSmall: (d * (aNatural modBase)))
+                sdivmod:with: (Natural base)
+                      [block (q r) (set zlo (Natural fromSmall: r)) q]))
+       ((zlo + (((zhi + ((aNatural divBase) * (Natural fromSmall: d)))
+          + (m * (Natural fromSmall: (aNatural modBase)))) timesBase))
+          + (((m * (aNatural divBase)) timesBase) timesBase))) 
+
+    ! The largest multiplication possible being at least 50^50
+    ! Total bytes allocated for 50^50: 20,854,345,720 bytes
+        total time: 28.14user 0.03system 0:28.18 elapsed
+
+    The second is...
+
+    ! NatZero 
+      (method * (aNatural) self)
+      (method timesSmall: (n) self) ; private
+
+    ! NatNonZero 
+      (method timesSmall: (n) [locals zhi zlo]
+          (set zhi (Natural fromSmall: ((n * d) div: (Natural base))))
+          (set zlo ((n * d) mod: (Natural base)))
+          (NatNonZero first:rest: zlo ((m timesSmall: n) + zhi)))
+      (method * (aNatural)
+         ((aNatural timesSmall: d) + ((m * aNatural) timesBase)))     
+     
+     ! Total bytes allocated for 50^50: 272,020,600 bytes
+        total time: 0.36user 0.01system 0:00.38 elapsed
